@@ -1,9 +1,13 @@
 module Test.Main where
 
 import Prelude
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
 
-main :: forall e. Eff (console :: CONSOLE | e) Unit
+import Data.Maybe (Maybe)
+import Test.MA (checkMA)
+import Test.QuickCheck (QC)
+import Type.Proxy (Proxy2(Proxy2))
+
+
+main :: QC () Unit
 main = do
-  log "You should add some tests."
+  checkMA (Proxy2 :: Proxy2 Maybe)
