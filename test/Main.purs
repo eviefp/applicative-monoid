@@ -3,6 +3,7 @@ module Test.Main where
 import Prelude
 
 import Data.Maybe (Maybe)
+import Test.AM (checkAM)
 import Test.MA (checkMA)
 import Test.QuickCheck (QC)
 import Type.Proxy (Proxy2(Proxy2))
@@ -10,4 +11,5 @@ import Type.Proxy (Proxy2(Proxy2))
 
 main :: QC () Unit
 main = do
-  checkMA (Proxy2 :: Proxy2 Maybe)
+  checkMA (Proxy2 ∷ Proxy2 Maybe)
+  checkAM (Proxy2 ∷ Proxy2 Maybe)

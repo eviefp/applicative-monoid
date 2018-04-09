@@ -4,34 +4,10 @@ module Test.MA where
 import Control.Monad.Eff.Console (log)
 import Data.Tuple (Tuple(..))
 import MA (class MonoidApplicative, (<>), mempty)
-import Prelude (class Eq, class Functor, Ordering, Unit, discard, eq, map, ($), (<$>), (<<<))
-import Test.QuickCheck (class Arbitrary, class Coarbitrary, QC, arbitrary, coarbitrary, quickCheck')
+import Prelude (class Eq, class Functor, Unit, discard, eq, map, ($), (<<<))
+import Test.QuickCheck (class Arbitrary, QC, quickCheck')
+import Test.TypeA (A)
 import Type.Proxy (Proxy2)
-
-
-newtype A = A Ordering
-
-instance eqA ∷ Eq A where
-  eq (A x) (A y) = eq x y
-
-instance arbitraryA ∷ Arbitrary A where
-  arbitrary = A <$> arbitrary
-
-instance coarbitraryA ∷ Coarbitrary A where
-  coarbitrary (A x) = coarbitrary x
-
-
-newtype B = B Ordering
-
-instance eqB ∷ Eq B where
-  eq (B x) (B y) = eq x y
-
-instance arbitraryB ∷ Arbitrary B where
-  arbitrary = B <$> arbitrary
-
-instance coarbitraryB ∷ Coarbitrary B where
-  coarbitrary (B x) = coarbitrary x
-
 
 
 checkMA ∷ ∀ eff f
@@ -45,8 +21,10 @@ checkMA ∷ ∀ eff f
 checkMA _ = do
   log "Checking 'Associativity' law for MonoidApplicative"
   quickCheck' 1000 associativity
+
   log "Checking 'Left Identity' law for MonoidApplicative"
   quickCheck' 1000 leftIdentity
+
   log "Checking 'Right Identity' law for MonoidApplicative"
   quickCheck' 1000 rightIdentity
 
