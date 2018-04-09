@@ -3,17 +3,16 @@ module Test.MA where
 
 import Control.Monad.Eff.Console (log)
 import Data.Tuple (Tuple(..))
-import MA (class MonoidApplicative, (<>), mempty)
-import Prelude (class Eq, class Functor, Unit, discard, eq, map, ($), (<<<))
+import MA (TMApplicative, tempty, (<+>))
+import Prelude (class Applicative, class Eq, Unit, discard, eq, map, ($), (<<<))
 import Test.QuickCheck (class Arbitrary, QC, quickCheck')
 import Test.TypeA (A)
 import Type.Proxy (Proxy2)
 
 
 checkMA ∷ ∀ eff f
-        . MonoidApplicative f
-        ⇒ Arbitrary (f A)
-        ⇒ Functor f
+        . Applicative f
+        ⇒ Arbitrary (TMApplicative f A)
         ⇒ Eq (f (Tuple A (Tuple A A)))
         ⇒ Eq (f A)
         ⇒ Proxy2 f
@@ -39,19 +38,19 @@ checkMA _ = do
     isoRightUnit ∷ ∀ a. Tuple a Unit → a
     isoRightUnit (Tuple a _) = a
 
-    associativity ∷ f A → f A → f A → Boolean
+    associativity ∷ TMApplicative f A → TMApplicative f A → TMApplicative f A → Boolean
     associativity x y z =
       eq left <<< map isoTuple $ right
 
       where
 
-      left = x <> (y <> z)
-      right = (x <> y) <> z
+      left = x <+> (y <+> z)
+      right = (x <+> y) <+> z
 
-    leftIdentity ∷ f A → Boolean
+    leftIdentity ∷ TMApplicative f A → Boolean
     leftIdentity fa =
-      eq fa <<< map isoLeftUnit $ mempty <> fa
+      eq fa <<< map isoLeftUnit $ tempty <+> fa
 
-    rightIdentity ∷ f A → Boolean
+    rightIdentity ∷ TMApplicative f A → Boolean
     rightIdentity fa =
-      eq fa <<< map isoRightUnit $ fa <> mempty
+      eq fa <<< map isoRightUnit $ fa <+> tempty

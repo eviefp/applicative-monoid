@@ -1,30 +1,45 @@
 module MA where
 
+import Control.Apply (class Apply, (<#>), (<$))
+import Data.Eq (class Eq)
+import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(Tuple))
-import Prelude (class Applicative, class Functor, Unit, const, pure, unit, (<$>), (<*>))
+import Prelude (class Applicative, class Functor, Unit, pure, unit, ($), (<$>), (<*>), (<<<))
+import Test.QuickCheck (class Arbitrary)
 
 
-class MonoidApplicative f where
-  append ∷ ∀ a b. f a → f b → f (Tuple a b)
-  mempty ∷ f Unit
+class TupleMonoid f where
+  tappend ∷ ∀ a b. f a → f b → f (Tuple a b)
+  tempty  ∷ f Unit
 
-instance mapp ∷ Applicative f => MonoidApplicative f where
-  append fa fb = Tuple <$> fa <*> fb
-  mempty = pure unit
+instance maybeTupleMonoid ∷ TupleMonoid Maybe where
+  tappend fa fb = Tuple <$> fa <*> fb
+  tempty = Just unit
 
-infixr 5 append as <>
+newtype TMApplicative f a = TMApplicative (f a)
+
+derive newtype instance eqTMApp ∷ Eq (f a) ⇒ Eq (TMApplicative f a)
+derive newtype instance funTMApp ∷ Functor f ⇒ Functor (TMApplicative f)
+derive newtype instance applyTMApp ∷ Apply f ⇒ Apply (TMApplicative f)
+derive newtype instance appTMApp ∷ Applicative f ⇒ Applicative (TMApplicative f)
+derive newtype instance arbTMApp ∷ Arbitrary (f a) ⇒ Arbitrary (TMApplicative f a)
+
+instance tmMonoid ∷ Applicative f ⇒ TupleMonoid (TMApplicative f) where
+  tappend fa fb = Tuple <$> fa <*> fb
+  tempty = TMApplicative <<< pure $ unit
+
+infixr 5 tappend as <+>
+
+newtype TMMonoid f a = TMMonoid (f a)
 
 
-class ApplicativeMonoid f where
-  apply' ∷ ∀ a b. f (a → b) → f a → f b
-  pure'  ∷ ∀ a. a → f a
+derive newtype instance eqTMMon  ∷ Eq (f a) ⇒ Eq (TMMonoid f a)
+derive newtype instance funTMMon ∷ Functor f ⇒ Functor (TMMonoid f)
+derive newtype instance tmTMMon  ∷ TupleMonoid f ⇒ TupleMonoid (TMMonoid f)
+derive newtype instance arbTMMon ∷ Arbitrary (f a) ⇒ Arbitrary (TMMonoid f a)
 
-instance appm ∷ (Functor f, MonoidApplicative f) ⇒ ApplicativeMonoid f where
-  apply' fab fa = tapply <$> tuple
+instance applyTMMon ∷ (Functor f, TupleMonoid f) ⇒ Apply (TMMonoid f) where
+  apply fab fa = tappend fab fa <#> \(Tuple ab a) → ab a
 
-    where
-
-    tuple = append fab fa
-    tapply (Tuple ab a) = ab a
-
-  pure' a = const a <$> mempty
+instance appTMMon ∷ (Functor f, TupleMonoid f) ⇒ Applicative (TMMonoid f) where
+  pure a = a <$ tempty

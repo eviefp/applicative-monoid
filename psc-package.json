@@ -8,6 +8,7 @@
         "eff",
         "prelude",
         "tuples",
-        "quickcheck"
+        "quickcheck",
+        "quickcheck-laws"
     ]
 }
